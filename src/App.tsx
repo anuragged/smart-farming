@@ -18,26 +18,11 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <div className="container mx-auto">
+        <div className="container mx-auto p-4">
+          <Navigation />
           <Routes>
-            <Route
-              path="/"
-              element={
-                <>
-                  <Navigation />
-                  <Index />
-                </>
-              }
-            />
-            <Route
-              path="/simulation"
-              element={
-                <>
-                  <Navigation />
-                  <Simulation />
-                </>
-              }
-            />
+            <Route path="/" element={<Index />} />
+            <Route path="/simulation" element={<Simulation />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

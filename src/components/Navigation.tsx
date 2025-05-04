@@ -14,7 +14,7 @@ const Navigation = () => {
           to="/" 
           className={cn(
             "flex items-center px-4 py-2 text-sm font-medium rounded-md",
-            location.pathname === '/' ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"
+            location.pathname === '/' ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent/50"
           )}
         >
           <Leaf className="mr-2 h-4 w-4" />
@@ -24,7 +24,7 @@ const Navigation = () => {
           to="/simulation"
           className={cn(
             "flex items-center px-4 py-2 text-sm font-medium rounded-md",
-            location.pathname === '/simulation' ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"
+            location.pathname === '/simulation' ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent/50"
           )}
         >
           <MonitorDot className="mr-2 h-4 w-4" />

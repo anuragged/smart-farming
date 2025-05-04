@@ -2,19 +2,13 @@
 import React, { useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import DashboardHeader from '@/components/DashboardHeader';
 import { SimulationWebSocket, useSimulationStore } from '@/services/simulationService';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Cloud, Thermometer, Droplets } from 'lucide-react';
 
 const Simulation = () => {
-  const { isConnected, isSimulated, toggleSimulation, latestReading, historicalData } = useSimulationStore();
+  const { isConnected, latestReading, historicalData } = useSimulationStore();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -22,6 +16,13 @@ const Simulation = () => {
     
     // Connect on component mount
     simulationWs.connect();
+    
+    // Show toast with the exact values
+    toast({
+      title: "ESP32 Simulation Data",
+      description: `Temperature: ${latestReading.temperature.toFixed(2)}°C | Humidity: ${latestReading.humidity.toFixed(1)}% | Light: ${latestReading.light.toFixed(3)} lux | Soil Moisture: ${latestReading.soil_moisture.toFixed(2)}%`,
+      duration: 5000,
+    });
     
     // Disconnect on component unmount
     return () => {
@@ -37,28 +38,17 @@ const Simulation = () => {
     light: item.light
   }));
 
-  const handleToggleSimulation = () => {
-    toggleSimulation();
-    toast({
-      title: isSimulated ? "Using real data" : "Using simulated data",
-      description: isSimulated 
-        ? "Switched to real sensor readings" 
-        : "Switched to simulated data from Wokwi",
-      duration: 3000,
-    });
-  };
-
   return (
-    <div className="min-h-screen flex flex-col px-4 py-6 md:px-8">
+    <div className="min-h-screen flex flex-col">
       <DashboardHeader 
-        title="ThingSpeak Data Monitor" 
-        subtitle="Real-time data from ESP32 via ThingSpeak API"
+        title="ESP32 Simulation Monitor" 
+        subtitle="Displaying exact values from ESP32 simulation"
         className="mb-6"
       />
       
       <div className="flex items-center space-x-4 mb-4">
         <Badge variant={isConnected ? "success" : "destructive"} className="py-1">
-          {isConnected ? "Connected to ThingSpeak" : "Disconnected"}
+          {isConnected ? "Connected to Simulation" : "Disconnected"}
         </Badge>
       </div>
       
@@ -90,7 +80,7 @@ const Simulation = () => {
                 <div className="flex flex-col">
                   <span className="text-muted-foreground text-sm">Temperature</span>
                   <span className="text-2xl font-semibold">
-                    {latestReading.temperature.toFixed(1)}°C
+                    {latestReading.temperature.toFixed(2)}°C
                   </span>
                 </div>
                 <div className="flex flex-col">
@@ -102,13 +92,13 @@ const Simulation = () => {
                 <div className="flex flex-col">
                   <span className="text-muted-foreground text-sm">Soil Moisture</span>
                   <span className="text-2xl font-semibold">
-                    {latestReading.soil_moisture.toFixed(1)}%
+                    {latestReading.soil_moisture.toFixed(2)}%
                   </span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-muted-foreground text-sm">Light Level</span>
                   <span className="text-2xl font-semibold">
-                    {latestReading.light.toFixed(1)} lux
+                    {latestReading.light.toFixed(3)} lux
                   </span>
                 </div>
               </div>
@@ -117,123 +107,152 @@ const Simulation = () => {
           
           <Card className="soil-card flex-1">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-semibold">Real-time Data</CardTitle>
+              <CardTitle className="text-lg font-semibold">Data from ESP32</CardTitle>
             </CardHeader>
-            <CardContent className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={formattedData}
-                  margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
-                  <XAxis 
-                    dataKey="time" 
-                    tick={{ fontSize: 12 }}
-                    tickLine={{ stroke: "#ccc" }}
-                  />
-                  <YAxis 
-                    yAxisId="left"
-                    tick={{ fontSize: 12 }}
-                    tickLine={{ stroke: "#ccc" }}
-                    domain={[10, 35]}
-                    label={{ value: '°C', angle: -90, position: 'insideLeft', dx: -15 }}
-                  />
-                  <YAxis 
-                    yAxisId="right"
-                    orientation="right"
-                    domain={[0, 100]}
-                    tick={{ fontSize: 12 }}
-                    tickLine={{ stroke: "#ccc" }}
-                    label={{ value: '%', angle: -90, position: 'insideRight', dx: 15 }}
-                  />
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                      border: '1px solid #ddd',
-                      borderRadius: '0.5rem',
-                    }} 
-                  />
-                  <Legend verticalAlign="top" height={36} />
-                  <Line
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="temperature"
-                    stroke="#FF5733"
-                    strokeWidth={2}
-                    activeDot={{ r: 6 }}
-                    dot={{ r: 3 }}
-                    name="Temperature (°C)"
-                  />
-                  <Line
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="humidity"
-                    stroke="#33A1FF"
-                    strokeWidth={2}
-                    activeDot={{ r: 6 }}
-                    dot={{ r: 3 }}
-                    name="Humidity (%)"
-                  />
-                  <Line
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="soil_moisture"
-                    stroke="#33FF57"
-                    strokeWidth={2}
-                    activeDot={{ r: 6 }}
-                    dot={{ r: 3 }}
-                    name="Soil Moisture (%)"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            <CardContent className="p-4">
+              <div className="bg-muted p-4 rounded-md font-mono text-sm">
+                <pre className="whitespace-pre-wrap break-all">
+                  Data sent to ThingSpeak. Response: 200
+                  Temperature    : {latestReading.temperature.toFixed(2)} °C
+                  Humidity       : {latestReading.humidity.toFixed(1)} %
+                  Brightness (Lux): {latestReading.light.toFixed(3)}
+                  Soil Moisture  : {latestReading.soil_moisture.toFixed(2)} %
+                </pre>
+              </div>
             </CardContent>
           </Card>
         </div>
       </div>
       
-      <Card className="mt-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-semibold">Light Levels</CardTitle>
-        </CardHeader>
-        <CardContent className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={formattedData}
-              margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
-              <XAxis 
-                dataKey="time" 
-                tick={{ fontSize: 12 }}
-                tickLine={{ stroke: "#ccc" }}
-              />
-              <YAxis 
-                tick={{ fontSize: 12 }}
-                tickLine={{ stroke: "#ccc" }}
-                domain={[0, 'auto']}
-                label={{ value: 'lux', angle: -90, position: 'insideLeft', dx: -15 }}
-              />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  border: '1px solid #ddd',
-                  borderRadius: '0.5rem',
-                }} 
-              />
-              <Legend verticalAlign="top" height={36} />
-              <Line
-                type="monotone"
-                dataKey="light"
-                stroke="#FFCC33"
-                strokeWidth={2}
-                activeDot={{ r: 6 }}
-                dot={{ r: 3 }}
-                name="Light (lux)"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <Card className="soil-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold">Temperature & Humidity</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={formattedData}
+                margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                <XAxis 
+                  dataKey="time" 
+                  tick={{ fontSize: 12 }}
+                  tickLine={{ stroke: "#ccc" }}
+                />
+                <YAxis 
+                  yAxisId="left"
+                  tick={{ fontSize: 12 }}
+                  tickLine={{ stroke: "#ccc" }}
+                  domain={[10, 20]}
+                  label={{ value: '°C', angle: -90, position: 'insideLeft', dx: -15 }}
+                />
+                <YAxis 
+                  yAxisId="right"
+                  orientation="right"
+                  domain={[70, 85]}
+                  tick={{ fontSize: 12 }}
+                  tickLine={{ stroke: "#ccc" }}
+                  label={{ value: '%', angle: -90, position: 'insideRight', dx: 15 }}
+                />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    border: '1px solid #ddd',
+                    borderRadius: '0.5rem',
+                  }} 
+                />
+                <Legend verticalAlign="top" height={36} />
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="temperature"
+                  stroke="#FF5733"
+                  strokeWidth={2}
+                  activeDot={{ r: 6 }}
+                  dot={{ r: 3 }}
+                  name="Temperature (°C)"
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="humidity"
+                  stroke="#33A1FF"
+                  strokeWidth={2}
+                  activeDot={{ r: 6 }}
+                  dot={{ r: 3 }}
+                  name="Humidity (%)"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+        
+        <Card className="soil-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold">Light & Soil Moisture</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={formattedData}
+                margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                <XAxis 
+                  dataKey="time" 
+                  tick={{ fontSize: 12 }}
+                  tickLine={{ stroke: "#ccc" }}
+                />
+                <YAxis 
+                  yAxisId="left"
+                  tick={{ fontSize: 12 }}
+                  tickLine={{ stroke: "#ccc" }}
+                  domain={[400, 550]}
+                  label={{ value: 'lux', angle: -90, position: 'insideLeft', dx: -15 }}
+                />
+                <YAxis 
+                  yAxisId="right"
+                  orientation="right"
+                  domain={[0, 5]}
+                  tick={{ fontSize: 12 }}
+                  tickLine={{ stroke: "#ccc" }}
+                  label={{ value: '%', angle: -90, position: 'insideRight', dx: 15 }}
+                />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    border: '1px solid #ddd',
+                    borderRadius: '0.5rem',
+                  }} 
+                />
+                <Legend verticalAlign="top" height={36} />
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="light"
+                  stroke="#FFCC33"
+                  strokeWidth={2}
+                  activeDot={{ r: 6 }}
+                  dot={{ r: 3 }}
+                  name="Light (lux)"
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="soil_moisture"
+                  stroke="#33FF57"
+                  strokeWidth={2}
+                  activeDot={{ r: 6 }}
+                  dot={{ r: 3 }}
+                  name="Soil Moisture (%)"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
