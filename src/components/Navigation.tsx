@@ -1,9 +1,13 @@
 
 import React from 'react';
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Leaf, MonitorDot } from 'lucide-react';
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+} from '@/components/ui/navigation-menu';
 
 const Navigation = () => {
   const location = useLocation();
@@ -13,9 +17,8 @@ const Navigation = () => {
       <NavigationMenuList>
         <NavigationMenuItem>
           <Link to="/" className={cn(
-            navigationMenuTriggerStyle(),
-            location.pathname === '/' && "bg-accent text-accent-foreground",
-            "flex items-center"
+            "flex items-center px-4 py-2 text-sm font-medium rounded-md",
+            location.pathname === '/' ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"
           )}>
             <Leaf className="mr-2 h-4 w-4" />
             Dashboard
@@ -23,9 +26,8 @@ const Navigation = () => {
         </NavigationMenuItem>
         <NavigationMenuItem>
           <Link to="/simulation" className={cn(
-            navigationMenuTriggerStyle(),
-            location.pathname === '/simulation' && "bg-accent text-accent-foreground",
-            "flex items-center"
+            "flex items-center px-4 py-2 text-sm font-medium rounded-md",
+            location.pathname === '/simulation' ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"
           )}>
             <MonitorDot className="mr-2 h-4 w-4" />
             Simulation
