@@ -5,6 +5,8 @@ import { create } from 'zustand';
 export type SensorReading = {
   temperature: number;
   humidity: number;
+  soil_moisture: number;
+  light: number;
   timestamp: string;
 };
 
@@ -19,6 +21,9 @@ export type SimulationState = {
   addReading: (reading: SensorReading) => void;
 };
 
+const THINGSPEAK_CHANNEL_ID = '2714180'; // Replace with your actual channel ID
+const THINGSPEAK_API_KEY = '2P8Y3G0YIZSDJ80X'; // Your ThingSpeak API key
+
 // Create a store for our simulation data
 export const useSimulationStore = create<SimulationState>((set) => ({
   isConnected: false,
@@ -26,13 +31,11 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   latestReading: {
     temperature: 22.5,
     humidity: 45,
+    soil_moisture: 60,
+    light: 300,
     timestamp: new Date().toISOString(),
   },
-  historicalData: Array.from({ length: 10 }).map((_, i) => ({
-    temperature: 20 + Math.random() * 5,
-    humidity: 40 + Math.random() * 10,
-    timestamp: new Date(Date.now() - (9 - i) * 60000).toISOString(),
-  })),
+  historicalData: [],
   toggleSimulation: () => set((state) => ({ isSimulated: !state.isSimulated })),
   connect: () => set({ isConnected: true }),
   disconnect: () => set({ isConnected: false }),
@@ -43,11 +46,10 @@ export const useSimulationStore = create<SimulationState>((set) => ({
     })),
 }));
 
-// Mock WebSocket for simulation
+// WebSocket for simulation
 export class SimulationWebSocket {
   private static instance: SimulationWebSocket;
-  private socket: WebSocket | null = null;
-  private simulationInterval: number | null = null;
+  private pollingInterval: number | null = null;
 
   private constructor() {}
 
@@ -59,33 +61,87 @@ export class SimulationWebSocket {
   }
 
   public connect() {
-    if (this.socket) return;
-
-    // In a real implementation, we would connect to a WebSocket server
-    // For this simulation, we'll use a timer to generate mock data
     const simulationStore = useSimulationStore.getState();
     simulationStore.connect();
-
-    this.simulationInterval = window.setInterval(() => {
-      // Generate random variations in temperature and humidity
+    
+    // Fetch initial data
+    this.fetchThingSpeakData();
+    
+    // Set up polling for real-time updates
+    this.pollingInterval = window.setInterval(() => {
+      this.fetchThingSpeakData();
+    }, 15000); // Poll every 15 seconds (ThingSpeak has a rate limit)
+  }
+  
+  private async fetchThingSpeakData() {
+    try {
+      // Fetch the latest data point
+      const response = await fetch(
+        `https://api.thingspeak.com/channels/${THINGSPEAK_CHANNEL_ID}/feeds/last.json?api_key=${THINGSPEAK_API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch ThingSpeak data');
+      }
+      
+      const data = await response.json();
+      
+      // Parse the data and create a sensor reading
       const reading: SensorReading = {
-        temperature: 20 + Math.sin(Date.now() / 10000) * 5 + Math.random() * 2,
-        humidity: 40 + Math.sin(Date.now() / 15000) * 15 + Math.random() * 5,
-        timestamp: new Date().toISOString(),
+        soil_moisture: parseFloat(data.field1) || 0,
+        temperature: parseFloat(data.field2) || 0,
+        humidity: parseFloat(data.field3) || 0,
+        light: parseFloat(data.field4) || 0,
+        timestamp: new Date(data.created_at).toISOString(),
       };
-
-      // Add reading to store
+      
+      // Add the reading to the store
       useSimulationStore.getState().addReading(reading);
-
-      // Log for debugging
-      console.log('New simulation reading:', reading);
-    }, 3000); // Update every 3 seconds
+      console.log('New ThingSpeak reading:', reading);
+      
+      // Fetch historical data for the charts
+      this.fetchHistoricalData();
+    } catch (error) {
+      console.error('Error fetching ThingSpeak data:', error);
+    }
+  }
+  
+  private async fetchHistoricalData() {
+    try {
+      // Fetch the last 30 data points
+      const response = await fetch(
+        `https://api.thingspeak.com/channels/${THINGSPEAK_CHANNEL_ID}/feeds.json?api_key=${THINGSPEAK_API_KEY}&results=30`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch ThingSpeak historical data');
+      }
+      
+      const data = await response.json();
+      
+      // Parse the historical data
+      const historicalData: SensorReading[] = data.feeds.map((feed: any) => ({
+        soil_moisture: parseFloat(feed.field1) || 0,
+        temperature: parseFloat(feed.field2) || 0,
+        humidity: parseFloat(feed.field3) || 0,
+        light: parseFloat(feed.field4) || 0,
+        timestamp: new Date(feed.created_at).toISOString(),
+      }));
+      
+      // Set the historical data in the store
+      if (historicalData.length > 0) {
+        const store = useSimulationStore.getState();
+        store.historicalData = historicalData;
+      }
+    } catch (error) {
+      console.error('Error fetching ThingSpeak historical data:', error);
+    }
   }
 
   public disconnect() {
-    if (this.simulationInterval) {
-      window.clearInterval(this.simulationInterval);
-      this.simulationInterval = null;
+    if (this.pollingInterval) {
+      window.clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
     }
     useSimulationStore.getState().disconnect();
   }

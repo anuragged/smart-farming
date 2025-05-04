@@ -10,6 +10,8 @@ import { SimulationWebSocket, useSimulationStore } from '@/services/simulationSe
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Cloud, Thermometer, Droplets } from 'lucide-react';
 
 const Simulation = () => {
   const { isConnected, isSimulated, toggleSimulation, latestReading, historicalData } = useSimulationStore();
@@ -31,6 +33,8 @@ const Simulation = () => {
     time: new Date(item.timestamp).toLocaleTimeString(),
     temperature: item.temperature,
     humidity: item.humidity,
+    soil_moisture: item.soil_moisture,
+    light: item.light
   }));
 
   const handleToggleSimulation = () => {
@@ -47,33 +51,22 @@ const Simulation = () => {
   return (
     <div className="min-h-screen flex flex-col px-4 py-6 md:px-8">
       <DashboardHeader 
-        title="Simulation Environment" 
-        subtitle="Monitor and control ESP32 simulation with Wokwi"
+        title="ThingSpeak Data Monitor" 
+        subtitle="Real-time data from ESP32 via ThingSpeak API"
         className="mb-6"
       />
       
       <div className="flex items-center space-x-4 mb-4">
         <Badge variant={isConnected ? "success" : "destructive"} className="py-1">
-          {isConnected ? "Connected" : "Disconnected"}
+          {isConnected ? "Connected to ThingSpeak" : "Disconnected"}
         </Badge>
-        
-        <div className="flex items-center space-x-2">
-          <Switch 
-            id="simulation-mode" 
-            checked={isSimulated}
-            onCheckedChange={handleToggleSimulation} 
-          />
-          <Label htmlFor="simulation-mode">
-            {isSimulated ? "Simulated Data" : "Real Data"}
-          </Label>
-        </div>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Wokwi Simulator */}
         <Card className="lg:col-span-7 h-[600px] soil-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-semibold">Wokwi ESP32 Soil Monitor Simulation</CardTitle>
+            <CardTitle className="text-lg font-semibold">ESP32 Soil Monitor Simulation</CardTitle>
           </CardHeader>
           <CardContent className="h-[calc(100%-4rem)] p-0">
             <iframe 
@@ -104,6 +97,18 @@ const Simulation = () => {
                   <span className="text-muted-foreground text-sm">Humidity</span>
                   <span className="text-2xl font-semibold">
                     {latestReading.humidity.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground text-sm">Soil Moisture</span>
+                  <span className="text-2xl font-semibold">
+                    {latestReading.soil_moisture.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground text-sm">Light Level</span>
+                  <span className="text-2xl font-semibold">
+                    {latestReading.light.toFixed(1)} lux
                   </span>
                 </div>
               </div>
@@ -153,7 +158,7 @@ const Simulation = () => {
                     yAxisId="left"
                     type="monotone"
                     dataKey="temperature"
-                    stroke="#8B6D5D"
+                    stroke="#FF5733"
                     strokeWidth={2}
                     activeDot={{ r: 6 }}
                     dot={{ r: 3 }}
@@ -163,11 +168,21 @@ const Simulation = () => {
                     yAxisId="right"
                     type="monotone"
                     dataKey="humidity"
-                    stroke="#5CB85C"
+                    stroke="#33A1FF"
                     strokeWidth={2}
                     activeDot={{ r: 6 }}
                     dot={{ r: 3 }}
                     name="Humidity (%)"
+                  />
+                  <Line
+                    yAxisId="right"
+                    type="monotone"
+                    dataKey="soil_moisture"
+                    stroke="#33FF57"
+                    strokeWidth={2}
+                    activeDot={{ r: 6 }}
+                    dot={{ r: 3 }}
+                    name="Soil Moisture (%)"
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -175,6 +190,50 @@ const Simulation = () => {
           </Card>
         </div>
       </div>
+      
+      <Card className="mt-6">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-semibold">Light Levels</CardTitle>
+        </CardHeader>
+        <CardContent className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={formattedData}
+              margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+              <XAxis 
+                dataKey="time" 
+                tick={{ fontSize: 12 }}
+                tickLine={{ stroke: "#ccc" }}
+              />
+              <YAxis 
+                tick={{ fontSize: 12 }}
+                tickLine={{ stroke: "#ccc" }}
+                domain={[0, 'auto']}
+                label={{ value: 'lux', angle: -90, position: 'insideLeft', dx: -15 }}
+              />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  border: '1px solid #ddd',
+                  borderRadius: '0.5rem',
+                }} 
+              />
+              <Legend verticalAlign="top" height={36} />
+              <Line
+                type="monotone"
+                dataKey="light"
+                stroke="#FFCC33"
+                strokeWidth={2}
+                activeDot={{ r: 6 }}
+                dot={{ r: 3 }}
+                name="Light (lux)"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
     </div>
   );
 };
