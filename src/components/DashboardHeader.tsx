@@ -9,18 +9,20 @@ interface DashboardHeaderProps {
   title: string;
   subtitle: string;
   className?: string;
+  icon?: React.ReactNode;
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ 
   title, 
   subtitle,
-  className
+  className,
+  icon = <Leaf className="h-6 w-6 text-accent" />
 }) => {
   return (
     <div className={cn("flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fade-up", className)}>
       <div className="flex items-center">
         <div className="bg-accent/10 p-3 rounded-lg mr-4">
-          <Leaf className="h-6 w-6 text-accent" />
+          {icon}
         </div>
         <div>
           <h1 className="text-2xl font-bold">{title}</h1>
