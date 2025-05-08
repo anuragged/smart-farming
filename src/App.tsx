@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Simulation from "./pages/Simulation";
+import Wheelchair from "./pages/Wheelchair";
 import Navigation from "./components/Navigation";
 
 // Create a client
@@ -23,6 +24,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/simulation" element={<Simulation />} />
+            <Route path="/wheelchair" element={<Wheelchair />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
