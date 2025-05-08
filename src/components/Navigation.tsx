@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Leaf, MonitorDot, Activity } from 'lucide-react';
+import { Activity, MonitorDot } from 'lucide-react';
 
 const Navigation = () => {
   const location = useLocation();
@@ -17,8 +17,8 @@ const Navigation = () => {
             location.pathname === '/' ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent/50"
           )}
         >
-          <Leaf className="mr-2 h-4 w-4" />
-          Dashboard
+          <Activity className="mr-2 h-4 w-4" />
+          Smart Wheelchair
         </Link>
         <Link
           to="/simulation"
@@ -29,16 +29,6 @@ const Navigation = () => {
         >
           <MonitorDot className="mr-2 h-4 w-4" />
           ThingSpeak Monitor
-        </Link>
-        <Link
-          to="/wheelchair"
-          className={cn(
-            "flex items-center px-4 py-2 text-sm font-medium rounded-md",
-            location.pathname === '/wheelchair' ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent/50"
-          )}
-        >
-          <Activity className="mr-2 h-4 w-4" />
-          Smart Wheelchair
         </Link>
       </div>
     </nav>
