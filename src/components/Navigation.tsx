@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Leaf, MonitorDot, Wheelchair } from 'lucide-react';
+import { Leaf, MonitorDot, Activity } from 'lucide-react';
 
 const Navigation = () => {
   const location = useLocation();
@@ -37,7 +37,7 @@ const Navigation = () => {
             location.pathname === '/wheelchair' ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent/50"
           )}
         >
-          <Wheelchair className="mr-2 h-4 w-4" />
+          <Activity className="mr-2 h-4 w-4" />
           Smart Wheelchair
         </Link>
       </div>
