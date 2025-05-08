@@ -14,7 +14,7 @@ const Feature = ({
   children: React.ReactNode 
 }) => {
   return (
-    <Card className="h-full">
+    <Card className="h-full shadow-md hover:shadow-lg transition-all">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <div className="bg-primary/10 p-2 rounded-full">

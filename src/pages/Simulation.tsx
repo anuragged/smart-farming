@@ -14,7 +14,7 @@ const Simulation = () => {
       
       <div className="grid grid-cols-1 gap-6">
         {/* Wokwi Simulator */}
-        <Card className="h-[600px]">
+        <Card className="h-[600px] shadow-md">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-semibold">Smart Wheelchair Simulation</CardTitle>
           </CardHeader>
@@ -30,7 +30,7 @@ const Simulation = () => {
         </Card>
         
         {/* ThingSpeak Charts */}
-        <Card className="h-[600px]">
+        <Card className="h-[600px] shadow-md">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-semibold">ThingSpeak Data Visualization</CardTitle>
           </CardHeader>

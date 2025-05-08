@@ -72,12 +72,12 @@ export default {
 					clay: "#BF9D7E"
 				},
 				status: {
-					optimal: "#5CB85C",
-					warning: "#F0AD4E",
-					critical: "#D9534F",
-					optimalLight: "#F2FCE2",
-					warningLight: "#FEF7CD",
-					criticalLight: "#FEC6A1"
+					optimal: "#4CAF50",    // Changed to a cooler green
+					warning: "#2196F3",    // Changed to blue instead of orange
+					critical: "#F44336",   // Kept red but slightly cooler shade
+					optimalLight: "#E8F5E9",
+					warningLight: "#E3F2FD",
+					criticalLight: "#FFEBEE"
 				}
 			},
 			borderRadius: {
@@ -146,11 +146,11 @@ export default {
 				'data-update': 'data-update 1.5s ease-out'
 			},
 			backgroundImage: {
-				'soil-gradient': 'linear-gradient(to bottom, #f1edea, #e6ddd5)',
+				'soil-gradient': 'linear-gradient(to bottom, #E3F2FD, #BBDEFB)',
 				'card-gradient': 'linear-gradient(to bottom right, rgba(255,255,255,0.5), rgba(255,255,255,0.2))',
-				'optimal-gradient': 'linear-gradient(184.1deg, rgba(249,255,182,1) 44.7%, rgba(226,255,172,1) 67.2%)',
-				'warning-gradient': 'linear-gradient(90deg, hsla(39, 100%, 77%, 1) 0%, hsla(22, 90%, 57%, 1) 100%)',
-				'critical-gradient': 'linear-gradient(90deg, hsla(24, 100%, 83%, 1) 0%, hsla(341, 91%, 68%, 1) 100%)'
+				'optimal-gradient': 'linear-gradient(184.1deg, rgba(224,242,255,1) 44.7%, rgba(179,229,252,1) 67.2%)',
+				'warning-gradient': 'linear-gradient(90deg, hsla(199, 98%, 48%, 1) 0%, hsla(187, 100%, 45%, 1) 100%)',
+				'critical-gradient': 'linear-gradient(90deg, hsla(340, 100%, 76%, 1) 0%, hsla(349, 100%, 58%, 1) 100%)'
 			}
 		}
 	},
